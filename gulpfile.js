@@ -12,7 +12,9 @@ gulp.task('js', () => {
     var bundler = watchify(browserify('./src/app.js', { debug: true }).transform(babel));
 
     bundler.bundle()
-        .on('error', function(err) { console.error(err); this.emit('end'); })
+        .on('error', function(err) {
+            console.error(err); this.emit('end');
+        })
         .pipe(source('app.js'))
         .pipe(buffer())
         .pipe(sourcemaps.init({ loadMaps: true }))
