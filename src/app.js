@@ -1,3 +1,5 @@
+var THREE = require('three');
+
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 var renderer = new THREE.WebGLRenderer();
@@ -12,8 +14,8 @@ camera.position.z = 5;
 
 var render = function () {
     requestAnimationFrame(render);
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
+    cube.rotation.x += .01;
+    cube.rotation.y += .01;
     renderer.render(scene, camera);
 };
 render();
