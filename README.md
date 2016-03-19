@@ -7,11 +7,12 @@
 
 ## Setup
 
-    $ cd project/dir
+    $ git clone https://github.com/sebastianhaeni/webgl-playground
+    $ cd webgl-playground
     $ npm install
 
 ## Start
 
-    gulp
+    $ gulp serve
 
-Then open http://localhost:8888 in your favorite browser. (Note: this is not Internet Explorer)
+Then open [http://localhost:8888](http://localhost:8888) in your favorite browser. (Note: this is not Internet Explorer)
