@@ -31,7 +31,7 @@ gulp.task('js', () => {
         .pipe(source('app.js'))
         .pipe(buffer())
         .pipe(sourcemaps.init({ loadMaps: true }))
-        .pipe(uglify())
+        //.pipe(uglify()) // this takes way too long
         .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('./dist/js'));
 });

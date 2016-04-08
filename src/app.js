@@ -11,7 +11,7 @@ init();
 animate();
 
 function init() {
-    camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(15, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.x = -10;
     camera.position.y = 10;
     camera.position.z = 10;
@@ -20,6 +20,8 @@ function init() {
     renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(0x00000000);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.soft = true;
     document.body.appendChild(renderer.domElement);
 
     orbitControls = new OrbitControls(camera, renderer.domElement);
