@@ -9,10 +9,14 @@ canvas {
   width: 100%;
 }
 
-#scene-chooser {
+#scene-chooser, #move-chooser {
     background: #000;
     color: #fff;
     margin: 10px;
     padding: 5px;
     position: absolute;
+}
+
+#move-chooser {
+    right: 0
 }
