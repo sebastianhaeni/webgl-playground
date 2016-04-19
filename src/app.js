@@ -49,6 +49,7 @@ function initScenes() {
     }
 
     currentScene = scenes[document.getElementById('scene-chooser').value];
+    camera.lookAt(currentScene.position);
 
     sceneChooser.onchange = () => {
         let scene = document.getElementById('scene-chooser').value;

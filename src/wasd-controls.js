@@ -1,5 +1,9 @@
 const THREE = require('THREE');
 
+const MOVE_SPEED = .05;
+const ROTATION_SPEED = .05;
+const JUMP_SPEED = 0.03;
+
 module.exports = class WasdControls {
     constructor(camera) {
         this.camera = camera;
@@ -10,44 +14,44 @@ module.exports = class WasdControls {
 
     update() {
         if (this.moveForward) {
-            this.camera.translateZ(-.1);
+            this.camera.translateZ(-MOVE_SPEED);
         }
         if (this.moveLeft) {
-            this.camera.translateX(-.05);
+            this.camera.translateX(-MOVE_SPEED);
         }
         if (this.moveRight) {
-            this.camera.translateX(.05);
+            this.camera.translateX(MOVE_SPEED);
         }
         if (this.moveBackward) {
-            this.camera.translateZ(.1);
+            this.camera.translateZ(MOVE_SPEED);
         }
 
         if (this.lookUp) {
-            this.camera.rotateX(.05);
+            this.camera.rotateX(ROTATION_SPEED);
         }
         if (this.lookLeft) {
-            this.camera.rotateY(.05);
+            this.camera.rotateY(ROTATION_SPEED);
         }
         if (this.lookRight) {
-            this.camera.rotateY(-.05);
+            this.camera.rotateY(-ROTATION_SPEED);
         }
         if (this.lookDown) {
-            this.camera.rotateX(-.05);
+            this.camera.rotateX(-ROTATION_SPEED);
         }
 
         if (this.goingDown) {
-            this.camera.position.y -= .05   ;
+            this.camera.position.y -= JUMP_SPEED;
             if (this.camera.position.y < 0) {
                 this.goingDown = false;
             }
         } else if (this.jump) {
-            this.camera.position.y += .05;
-            
+            this.camera.position.y += JUMP_SPEED;
+
             if (this.camera.position.y > .8) {
                 this.goingDown = true;
             }
-        } else {
-            this.camera.position.y = 0;
+        } else if (this.camera.position.y > JUMP_SPEED) {
+            this.goingDown = true;
         }
 
         this.camera.rotation.z = 0;
@@ -55,7 +59,6 @@ module.exports = class WasdControls {
 
     addListeners(event, enable) {
         document.body.addEventListener(event, (e) => {
-            console.log(e.code);
             switch (e.code) {
                 case 'KeyW':
                     this.moveForward = enable;

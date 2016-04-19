@@ -40737,6 +40737,7 @@ function initScenes() {
     }
 
     currentScene = scenes[document.getElementById('scene-chooser').value];
+    camera.lookAt(currentScene.position);
 
     sceneChooser.onchange = function () {
         var scene = document.getElementById('scene-chooser').value;
@@ -40772,7 +40773,7 @@ function animate() {
     render();
 }
 
-},{"./scenes":7,"./wasd-controls":12,"three":2}],4:[function(require,module,exports){
+},{"./scenes":7,"./wasd-controls":13,"three":2}],4:[function(require,module,exports){
 'use strict';
 
 var THREE = require('three');
@@ -40915,7 +40916,12 @@ module.exports = {
     'light-spot': require('./light-spot')
 };
 
-},{"./crate":4,"./cube":5,"./deformed-cube":6,"./light-ambient":8,"./light-point":9,"./light-spot":10,"./pyramid":11}],8:[function(require,module,exports){
+},{"./crate":4,"./cube":5,"./deformed-cube":6,"./light-ambient":9,"./light-point":10,"./light-spot":11,"./pyramid":12}],8:[function(require,module,exports){
+"use strict";
+
+module.exports = [[1023, 1023, 1023, 1023, 1023, 1023, 1023], [1023, 513, 513, 513, 641, 513, 1023], [0, 0, 0, 0, 128, 0, 0]];
+
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var THREE = require('three');
@@ -40933,7 +40939,7 @@ scene.add(light);
 
 module.exports = scene;
 
-},{"three":2}],9:[function(require,module,exports){
+},{"three":2}],10:[function(require,module,exports){
 'use strict';
 
 var THREE = require('three');
@@ -40955,50 +40961,63 @@ scene.add(pointLight);
 
 module.exports = scene;
 
-},{"three":2}],10:[function(require,module,exports){
+},{"three":2}],11:[function(require,module,exports){
 'use strict';
 
 var THREE = require('three');
 
 var scene = new THREE.Scene();
 
-var plane = new THREE.Mesh(new THREE.PlaneGeometry(10, 10, 0), new THREE.MeshPhongMaterial({
-    side: THREE.DoubleSide,
-    color: 0xffffff
-}));
-plane.position.set(0, -.5, 0);
-plane.rotation.set(Math.PI / 2, 0, 0);
-plane.receiveShadow = true;
-scene.add(plane);
-
-var material = new THREE.MeshPhongMaterial({
+var texture = new THREE.TextureLoader().load('textures/crate.gif');
+var material = new THREE.MeshLambertMaterial({
     color: 0xffffff,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
+    map: texture
 });
-var geometry = new THREE.BoxBufferGeometry(1, 1, 1);
-var mesh = new THREE.Mesh(geometry, material);
-mesh.position.y = .001;
-mesh.castShadow = true;
-scene.add(mesh);
 
-var light = new THREE.AmbientLight(0x111111); // soft white light
+var light = new THREE.AmbientLight(0x777777); // soft white light
 scene.add(light);
 
-var spotLight = new THREE.SpotLight(0xdddddd, 3, 20, .2);
+var spotLight = new THREE.SpotLight(0xdddddd, 1, 20, .2);
 spotLight.target.position.set(.5, .5, .5);
 spotLight.position.set(-5, 5, 5);
 spotLight.castShadow = true;
 scene.add(spotLight);
 
-spotLight = new THREE.SpotLight(0xffffff, 10, 100, .1);
+spotLight = new THREE.SpotLight(0xffffff, 3, 100, .1);
 spotLight.target.position.set(.5, 10.5, .5);
 spotLight.position.set(10, 0, 3);
 spotLight.castShadow = true;
 scene.add(spotLight);
 
+var BLOCK_SIZE = .5;
+
+var geometry = new THREE.BoxBufferGeometry(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+var mesh = new THREE.Mesh(geometry, material);
+mesh.position.y = .001;
+mesh.castShadow = true;
+
+var level = require('./level1.js');
+for (var y = 0; y < level.length; y++) {
+    for (var x = 0; x < level[y].length; x++) {
+        if (level[y][x] === 0) {
+            continue;
+        }
+        for (var i = 0; i < 10; i++) {
+            var z = 1 << i;
+            if ((z & level[y][x]) !== z) {
+                continue;
+            }
+            mesh = mesh.clone();
+            mesh.position.set(x * BLOCK_SIZE, y * BLOCK_SIZE - 1, i * BLOCK_SIZE);
+            scene.add(mesh);
+        }
+    }
+}
+
 module.exports = scene;
 
-},{"three":2}],11:[function(require,module,exports){
+},{"./level1.js":8,"three":2}],12:[function(require,module,exports){
 'use strict';
 
 var THREE = require('three');
@@ -41035,7 +41054,7 @@ scene.add(axes);
 
 module.exports = scene;
 
-},{"three":2}],12:[function(require,module,exports){
+},{"three":2}],13:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -41043,6 +41062,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var THREE = require('THREE');
+
+var MOVE_SPEED = .05;
+var ROTATION_SPEED = .05;
+var JUMP_SPEED = 0.03;
 
 module.exports = function () {
     function WasdControls(camera) {
@@ -41058,44 +41081,44 @@ module.exports = function () {
         key: 'update',
         value: function update() {
             if (this.moveForward) {
-                this.camera.translateZ(-.1);
+                this.camera.translateZ(-MOVE_SPEED);
             }
             if (this.moveLeft) {
-                this.camera.translateX(-.05);
+                this.camera.translateX(-MOVE_SPEED);
             }
             if (this.moveRight) {
-                this.camera.translateX(.05);
+                this.camera.translateX(MOVE_SPEED);
             }
             if (this.moveBackward) {
-                this.camera.translateZ(.1);
+                this.camera.translateZ(MOVE_SPEED);
             }
 
             if (this.lookUp) {
-                this.camera.rotateX(.05);
+                this.camera.rotateX(ROTATION_SPEED);
             }
             if (this.lookLeft) {
-                this.camera.rotateY(.05);
+                this.camera.rotateY(ROTATION_SPEED);
             }
             if (this.lookRight) {
-                this.camera.rotateY(-.05);
+                this.camera.rotateY(-ROTATION_SPEED);
             }
             if (this.lookDown) {
-                this.camera.rotateX(-.05);
+                this.camera.rotateX(-ROTATION_SPEED);
             }
 
             if (this.goingDown) {
-                this.camera.position.y -= .05;
+                this.camera.position.y -= JUMP_SPEED;
                 if (this.camera.position.y < 0) {
                     this.goingDown = false;
                 }
             } else if (this.jump) {
-                this.camera.position.y += .05;
+                this.camera.position.y += JUMP_SPEED;
 
                 if (this.camera.position.y > .8) {
                     this.goingDown = true;
                 }
-            } else {
-                this.camera.position.y = 0;
+            } else if (this.camera.position.y > JUMP_SPEED) {
+                this.goingDown = true;
             }
 
             this.camera.rotation.z = 0;
@@ -41106,7 +41129,6 @@ module.exports = function () {
             var _this = this;
 
             document.body.addEventListener(event, function (e) {
-                console.log(e.code);
                 switch (e.code) {
                     case 'KeyW':
                         _this.moveForward = enable;
